@@ -1110,6 +1110,7 @@ module.exports = handle = (client, Client) => {
                     data.reply('auto upt')
                     break
                 case 'return':
+		case 'eval':
                     if(!data.isOwner) return data.reply(mess.ownerOnly)
                     try {
                         data.reply(JSON.stringify(eval(body), null, 3))
