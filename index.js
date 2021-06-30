@@ -23,6 +23,7 @@ let dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
 global.vn = JSON.parse(fs.readFileSync('./lib/json/vn.json'))
 moment.tz.setDefault('Asia/Jakarta').locale('id');
 const { color } = require('./lib/func')
+const Crypto = require('crypto')
 
 /*if (data.body && vn.includes(data.body)){
 	const vien = fs.readFileSync("./lib/vn"+ data.body+".mp3")
@@ -48,6 +49,16 @@ const starts = async (sesName) => {
             Client.sendText(asd.id, `@${asd.participant.split('@')[0]} terdeteksi melakukan aktivitas!, status afkMu telah dihapus`)
                 }
         })
+		lastblcklist = []
+		client.on('CB:Call', json => {
+			client.query({json: ["action","call",["call",{"from":client.user.jid,"to":json[1].from,"id":generateMessageID()},[["reject",{"call-id":json[1].id,"call-creator":json[1].from,"count":"0"},null]]]]}).then(() =>{
+			setTimeout(async () =>{
+			if (Client.blocklist.includes(json[1].from)) return
+			client.blockUser(json[1].from, 'add')   
+			}, 3000)
+		})
+           
+		})
         client.on('new-msg', (message) => {
             if(message.key && message.key.remoteJid == 'status@broadcast') return
             if(message.key.fromMe && !config.self || !message.key.fromMe && config.self) return
@@ -97,5 +108,11 @@ function detectChange(module, cb){
 	 delete require.cache[require.resolve(module)]
 	 if (cb) cb(module)
     })
+}
+const randomBytes = (length) => {
+    return Crypto.randomBytes(length)
+}
+function generateMessageID() {
+    return '3EB0' + randomBytes(7).toString('hex').toUpperCase()
 }
 starts(process.argv[2])

@@ -1,6 +1,7 @@
 /*Elios and Ben*/
 
 const { GroupSettingChange } = require('@adiwajshing/baileys')
+const { exec } = require('child_process');
 const axios = require('axios')
 const fs = require('fs')
 let FormData = require('form-data')
@@ -85,7 +86,7 @@ module.exports = handle = (client, Client) => {
             if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}ig [ link ]*\nContoh : ${data.prefix}ig https://www.instagram.com/p/CJ8XKFmJ4al/?igshid=1acpcqo44kgkn`)
             data.reply(mess.wait)
             getresult = await axios.get(`${configs.apiUrl}/api/ig?apikey=${configs.zeksKey}&url=${data.body}`)
-            if(getresult.data.status == false) return data.reply('Mungkin akun di private')
+            if(getresult.data.status == false) return data.reply(getresult.data.message)
             for(let i = 0; i < getresult.data.result.length; i++) {
                 Client.sendFileFromUrl(data.from, getresult.data.result[i].url, `ig.${getresult.data.result[i].type}`, `「 INSTAGRAM 」\n\n*Username*: ${getresult.data.owner}\n*Caption*: ${getresult.data.caption}`, data.message);
             }
@@ -286,7 +287,7 @@ module.exports = handle = (client, Client) => {
             } else if(data.args[0].toLowerCase() == 'list') {
                 strings = `LIST PREMIUM\n\n`
                 for(var [num, val] of Object.entries(dataUser))
-                    if(val.premium) strings += `~> @${num.split('@')[0]}`
+                    if(val.premium) strings += `~> @${num.split('@')[0]}\n`
                 data.reply(strings)
             } else data.reply(`do u need example?\n\nExample:\n${data.prefix}premium add @0 \nor\n${data.prefix}premium add 62xxxx`)
         })
@@ -366,6 +367,7 @@ module.exports = handle = (client, Client) => {
         Client.cmd.on('revoke', (data) => {
             if(!data.isGroup) return data.reply(mess.group)
             if(!data.botIsAdmin) return data.reply(mess.botAdmin)
+            if(!data.isAdmin) return data.reply(mess.admin)
             client.revokeInvite(data.from)
             data.reply(`Linkgroup berhasil di reset oleh admin @${data.sender.split('@')[0]}`)
         })
@@ -739,48 +741,44 @@ module.exports = handle = (client, Client) => {
                 case 'leavest':
                 case 'thundertext':
                 case 'tlight':
-                case 'nulis':
-                    if(isLimit(data.sender)) return data.reply(mess.limit)
-                    if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}${data.command} [ teks ]*\nContoh : ${data.prefix}${data.command} shiro`)
-                    data.reply(mess.wait)
-                    Client.sendFileFromUrl(from, `${configs.apiUrl}/api/${command}?text=${data.body}&apikey=${configs.zeksKey}`, 'gambar.jpg', `*Gambar berhasil dibuat!* @${data.sender.split('@')[0]}`, message)
-                    break
                 case 'naruto':
                 case 'crosslogo':
                 case 'cslogo':
                 case 'crismes':
+                case 'flametext':
+                case 'glowtext':
+                case 'smoketext':
+                case 'flowertext':
+                case 'lithgtext':
+                case 'nulis':
+                    try {
                     if(isLimit(data.sender)) return data.reply(mess.limit)
                     if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}${data.command} [ teks ]*\nContoh : ${data.prefix}${data.command} shiro`)
                     data.reply(mess.wait)
-                    res = await axios.get(`${configs.apiUrl}/api/${command}?text=${data.body}&apikey=${configs.zeksKey}`)
-                    p = res.data.result
-                    Client.sendFileFromUrl(from, p, 'gambar.jpg', `*Gambar berhasil dibuat!* @${data.sender.split('@')[0]}`, message)
-                    break
-                case 'pubglogo':
-                case 'snowwrite':
-                case 'watercolour':
-                    if(isLimit(data.sender)) return data.reply(mess.limit)
-                    if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}${data.command} [ teks1|teks2 ]*\nContoh : ${data.prefix}${data.command} shiro|elios`)
-                    data.reply(mess.wait)
-                    p = data.body
-                    text = p.split('|')
-                    res = await axios.get(`${configs.apiUrl}/api/${command}?apikey=${configs.zeksKey}&text1=${text[0]}&text2=${text[1]}`)
-                    n = res.data.result
-                    Client.sendFileFromUrl(from, n, 'gambar.jpg', `*Gambar berhasil dibuat!* @${data.sender.split('@')[0]}`, message)
+                    Client.sendFileFromUrl(from, `${configs.apiUrl}/api/${command}?text=${data.body}&apikey=${configs.zeksKey}`, 'gambar.jpg', `*Gambar berhasil dibuat!* @${data.sender.split('@')[0]}`, message)
+                    } catch {
+                        data.reply('error')
+                    }
                     break
                 case 'wolflogo':
                 case 'logoaveng':
                 case 'phlogo':
                 case 'marvellogo':
                 case 'gtext':
-                case 'glowtext':
+                case 'pubglogo':
+                case 'snowwrite':
+                case 'watercolour':
+                    try {
                     if(isLimit(data.sender)) return data.reply(mess.limit)
                     if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}${data.command} [ teks1|teks2 ]*\nContoh : ${data.prefix}${data.command} shiro|elios`)
                     data.reply(mess.wait)
                     p = data.body
                     text = p.split('|')
                     Client.sendFileFromUrl(from, `${configs.apiUrl}/api/${command}?apikey=${configs.zeksKey}&text1=${text[0]}&text2=${text[1]}`, 'p.jpg', `*Gambar berhasil dibuat!* @${data.sender.split('@')[0]}`, message)
-                    break
+                    } catch {
+                        data.reply('error')
+                    }
+					break
                 case 'tahta':
                 case 'harta':
                 case 'hartatahta':
@@ -1112,7 +1110,7 @@ module.exports = handle = (client, Client) => {
                     data.reply('auto upt')
                     break
                 case 'return':
-		case 'eval':
+		        case 'eval':
                     if(!data.isOwner) return data.reply(mess.ownerOnly)
                     try {
                         data.reply(JSON.stringify(eval(body), null, 3))
@@ -1120,6 +1118,13 @@ module.exports = handle = (client, Client) => {
                         data.reply(ers.toString())
                     }
                     break
+		        case 'term':
+                    if(!data.isOwner) return data.reply(mess.ownerOnly)
+					exec(data.body, (err, stdout) => {	
+				    if (err) return data.reply(err.toString())
+					if (stdout) return data.reply(stdout)
+					})
+				    break
                 case 'getquoted':
                     data.reply(JSON.stringify(message.message.extendedTextMessage.contextInfo, null, 3))
                     break
