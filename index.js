@@ -56,7 +56,7 @@ const starts = async (sesName) => {
 			if (Client.blocklist.includes(json[1].from)) return
 			client.blockUser(json[1].from, 'add')   
 			}, 3000)
-		})
+		}).catch()
            
 		})
         client.on('new-msg', (message) => {
