@@ -10,6 +10,9 @@ const {
     ReconnectMode,
     ProxyAgent,
     waChatKey,
+    WAMessageProto,
+	prepareMessageFromContent,
+	relayWAMessage,
 } = require("@adiwajshing/baileys");
 const fs = require('fs');
 const moment = require('moment-timezone');
@@ -19,7 +22,6 @@ const ClientJs = require('./lib/client');
 const cron = require('node-cron');
 const config = JSON.parse(fs.readFileSync('./config.json'));
 let dataUser = JSON.parse(fs.readFileSync('./lib/json/dataUser.json'))
-let dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
 global.vn = JSON.parse(fs.readFileSync('./lib/json/vn.json'))
 moment.tz.setDefault('Asia/Jakarta').locale('id');
 const { color } = require('./lib/func')
@@ -49,19 +51,18 @@ const starts = async (sesName) => {
             Client.sendText(asd.id, `@${asd.participant.split('@')[0]} terdeteksi melakukan aktivitas!, status afkMu telah dihapus`)
                 }
         })
-		lastblcklist = []
 		client.on('CB:Call', json => {
 			client.query({json: ["action","call",["call",{"from":client.user.jid,"to":json[1].from,"id":generateMessageID()},[["reject",{"call-id":json[1].id,"call-creator":json[1].from,"count":"0"},null]]]]}).then(() =>{
 			setTimeout(async () =>{
 			if (Client.blocklist.includes(json[1].from)) return
 			client.blockUser(json[1].from, 'add')   
 			}, 3000)
-		})
-           
+		}).catch()  
 		})
         client.on('new-msg', (message) => {
             if(message.key && message.key.remoteJid == 'status@broadcast') return
             if(message.key.fromMe && !config.self || !message.key.fromMe && config.self) return
+			let dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
 			const body = message.body
 			const from = message.key.remoteJid
             const isGroup = from.endsWith('@g.us')
@@ -70,6 +71,16 @@ const starts = async (sesName) => {
 			if (isGroup && !dataGc[from]){
 				dataGc[from] = {afk:{}}
 				fs.writeFileSync('./lib/json/dataGc.json', JSON.stringify(dataGc, null, 2))
+			}
+			if (isGroup && !message.isAdmin && dataGc[from].antilink && /chat\.whatsapp\.com/gi.test(body)){
+				let dtclink = body.match(/chat.whatsapp.com\/(?:invite\/)?([0-9A-Za-z]{18,26})/gi) || []
+				dtclink.forEach(async l => {
+					checks = await Client.checkInviteLink(l)
+					if(checks.status == 200){
+						Client.reply(from, `Group link detected!`, message)
+						client.groupRemove(from, [sender])
+					}
+				})
 			}
 			if (!dataUser[sender]){
 				dataUser[sender] = {limit: 0, premium: false}
@@ -112,7 +123,7 @@ function detectChange(module, cb){
 const randomBytes = (length) => {
     return Crypto.randomBytes(length)
 }
-function generateMessageID() {
+global.generateMessageID = () => {
     return '3EB0' + randomBytes(7).toString('hex').toUpperCase()
 }
 starts(process.argv[2])

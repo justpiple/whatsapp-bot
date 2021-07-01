@@ -1,6 +1,6 @@
 /*Elios and Ben*/
 
-const { GroupSettingChange } = require('@adiwajshing/baileys')
+const { GroupSettingChange, WAMessageProto, prepareMessageFromContent, relayWAMessage } = require('@adiwajshing/baileys')
 const { exec } = require('child_process');
 const axios = require('axios')
 const fs = require('fs')
@@ -346,7 +346,28 @@ module.exports = handle = (client, Client) => {
                 dataGc[data.from].welcome = false
                 fs.writeFileSync('./lib/json/dataGc.json', JSON.stringify(dataGc))
                 data.reply('Sukses!')
-            } else data.reply('pilih on/off')
+            } else {
+				let po = client.prepareMessageFromContent(data.from, {
+					"listMessage":{
+                  "title": "*WHATSAPP-BOT*",
+                  "description": "pilh on/off",
+                  "buttonText": "COMMANDS",
+                  "listType": "SINGLE_SELECT",
+                  "sections": [
+                     {
+                        "rows": [
+                           {
+                              "title": "on",
+                              "rowId": `${data.prefix}${data.command} on`
+                           },
+						   {
+                              "title": "off",
+                              "rowId": `${data.prefix}${data.command} off`
+                           }
+                        ]
+                     }]}}, {}) 
+            client.relayWAMessage(po, {waitForAck: true})
+			}
         })
         Client.cmd.on('leave', (data) => {
             if(!data.isGroup) return data.reply(mess.admin)
@@ -362,7 +383,65 @@ module.exports = handle = (client, Client) => {
                 dataGc[data.from].leave = false
                 fs.writeFileSync('./lib/json/dataGc.json', JSON.stringify(dataGc))
                 data.reply('Sukses!')
-            } else data.reply('pilih on/off')
+            } else {
+				let po = client.prepareMessageFromContent(data.from, {
+					"listMessage":{
+                  "title": "*WHATSAPP-BOT*",
+                  "description": "pilh on/off",
+                  "buttonText": "COMMANDS",
+                  "listType": "SINGLE_SELECT",
+                  "sections": [
+                     {
+                        "rows": [
+                           {
+                              "title": "on",
+                              "rowId": `${data.prefix}${data.command} on`
+                           },
+						   {
+                              "title": "off",
+                              "rowId": `${data.prefix}${data.command} off`
+                           }
+                        ]
+                     }]}}, {}) 
+            client.relayWAMessage(po, {waitForAck: true})
+			}
+        })
+		Client.cmd.on('antilink', (data) => {
+            if(!data.isGroup) return data.reply(mess.admin)
+            if(!data.isAdmin) return data.reply(mess.admin)
+            const dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
+            if(data.args[0].toLowerCase() == 'on') {
+                if(dataGc[data.from].antilink) return data.reply('Already on!')
+                dataGc[data.from].antilink = true
+                fs.writeFileSync('./lib/json/dataGc.json', JSON.stringify(dataGc))
+                data.reply('Sukses!')
+            } else if(data.args[0].toLowerCase() == 'off') {
+                if(!dataGc[data.from].antilink) return data.reply('Already off!')
+                dataGc[data.from].antilink = false
+                fs.writeFileSync('./lib/json/dataGc.json', JSON.stringify(dataGc))
+                data.reply('Sukses!')
+            } else {
+				let po = client.prepareMessageFromContent(data.from, {
+					"listMessage":{
+                  "title": "*WHATSAPP-BOT*",
+                  "description": "pilh on/off",
+                  "buttonText": "COMMANDS",
+                  "listType": "SINGLE_SELECT",
+                  "sections": [
+                     {
+                        "rows": [
+                           {
+                              "title": "on",
+                              "rowId": `${data.prefix}${data.command} on`
+                           },
+						   {
+                              "title": "off",
+                              "rowId": `${data.prefix}${data.command} off`
+                           }
+                        ]
+                     }]}}, {}) 
+            client.relayWAMessage(po, {waitForAck: true})
+			}
         })
         Client.cmd.on('revoke', (data) => {
             if(!data.isGroup) return data.reply(mess.group)
@@ -382,8 +461,27 @@ module.exports = handle = (client, Client) => {
                 client.groupSettingChange(data.from, GroupSettingChange.messageSend, true)
                 data.reply(`Group telah ditutup oleh admin @${data.sender.split('@')[0]}`)
             } else {
-                data.reply('Pilih open/close')
-            }
+				let po = client.prepareMessageFromContent(data.from, {
+					"listMessage":{
+                  "title": "*WHATSAPP-BOT*",
+                  "description": "pilh open/close",
+                  "buttonText": "COMMANDS",
+                  "listType": "SINGLE_SELECT",
+                  "sections": [
+                     {
+                        "rows": [
+                           {
+                              "title": "open",
+                              "rowId": `${data.prefix}${data.command} open`
+                           },
+						   {
+                              "title": "close",
+                              "rowId": `${data.prefix}${data.command} close`
+                           }
+                        ]
+                     }]}}, {}) 
+            client.relayWAMessage(po, {waitForAck: true})
+			}
         })
         Client.cmd.on('bye', (data) => {
             if(!data.isGroup) return data.reply(mess.group)
@@ -998,25 +1096,45 @@ module.exports = handle = (client, Client) => {
                             }).catch(() => Client.reply(from, 'Internal server error!, try again later', message))
                     } else Client.reply(from, 'Wrong format!', message)
                     break
+                case 'wallpaper':
+				    try{
+                    if(isLimit(data.sender)) return data.reply(mess.limit)
+                    if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}wallpaper [ query ]*\nContoh : ${data.prefix}wallpaper kucing`)
+                    data.reply(mess.wait)
+                    res = await axios.get(`${configs.apiUrl}/api/unsplash?apikey=${configs.zeksKey}&q=${data.body}`)
+                    if(res.data.status == false) data.reply(res.data.message)
+                    n = res.data.result
+                    image = n[Math.floor(Math.random() * n.length)]
+                    Client.sendFileFromUrl(from, image.img_hd, 'p.jpg', `*Hasil pecarian* : ${data.body}`, message)
+                    } catch {
+                        data.reply(`error`)
+                    }
+                    break
                 case 'pinterest':
+				    try{
                     if(isLimit(data.sender)) return data.reply(mess.limit)
                     if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}pinterest [ query ]*\nContoh : ${data.prefix}pinterest kucing`)
                     data.reply(mess.wait)
                     res = await axios.get(`${configs.apiUrl}/api/pinimg?apikey=${configs.zeksKey}&q=${data.body}`)
-                    if(res.data.status == false) data.reply(res.data.message)
                     n = res.data.data
                     image = n[Math.floor(Math.random() * n.length)]
                     Client.sendFileFromUrl(from, image, 'p.jpg', `*Hasil pecarian* : ${data.body}`, message)
+                    } catch {
+                        data.reply(`error`)
+                    }
                     break
                 case 'googleimage':
+				    try{
                     if(isLimit(data.sender)) return data.reply(mess.limit)
                     if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}googleimage [ query ]*\nContoh : ${data.prefix}googleimage kucing`)
                     data.reply(mess.wait)
                     res = await axios.get(`${configs.apiUrl}/api/gimg?apikey=${configs.zeksKey}&q=${data.body}`)
-                    if(res.data.status == false) data.reply(res.data.message)
                     n = res.data.data
                     image = n[Math.floor(Math.random() * n.length)]
                     Client.sendFileFromUrl(from, image, 'p.jpg', `*Hasil pecarian* : ${data.body}`, message)
+                    } catch {
+                        data.reply(`error`)
+                    }
                     break
                 case 'jagokata':
                     if(isLimit(data.sender)) return data.reply(mess.limit)
@@ -1105,6 +1223,12 @@ module.exports = handle = (client, Client) => {
                     Client.sendRawWebpAsSticker(from, fs.readFileSync('./lib/temp/sticks.webp'), message).then(resData => Client.sendText(from, 'gunakan sticker ini untuk membuat sticker dengan cara reply image/video dengan sticker ini', {
                         quoted: resData
                     }))
+                    Client.sendRawWebpAsSticker(from, fs.readFileSync('./lib/temp/open.webp'), message).then(resData => Client.sendText(from, 'gunakan sticker ini untuk membuka group', {
+                        quoted: resData
+                    }))
+                    Client.sendRawWebpAsSticker(from, fs.readFileSync('./lib/temp/close.webp'), message).then(resData => Client.sendText(from, 'gunakan sticker ini untuk menutup group', {
+                        quoted: resData
+                    }))
                     break
                 case 'tes':
                     data.reply('auto upt')
@@ -1137,7 +1261,7 @@ module.exports = handle = (client, Client) => {
                     if(message.message.extendedTextMessage.contextInfo.quotedMessage.stickerMessage.isAnimated) {
                         axios(`https://serv-api.zeks.xyz/sticker/togif`, { method: "post", headers: { "content-type": 'application/json' }, data: {base64: mtdt.toString('base64')}}).then(bf => {
                             Client.sendFileFromBase64(from, bf.data.result, 'to.gif', 'nih', message)
-			})
+						})
                     } else {
                         axios(`https://serv-api.zeks.xyz/sticker/png`, { method: "post", headers: { "content-type": 'application/json' }, data: { base64: mtdt.toString('base64')}}).then(bf => {
                             Client.sendFileFromBase64(from, bf.data.result, 'to.png', 'nih', message)
@@ -1164,7 +1288,7 @@ module.exports = handle = (client, Client) => {
                 pushname,
                 t
             } = datas
-            //console.log(`ID STICKER: ${idStick}`) //digunakan untuk mendapatkan id sticker
+            console.log(`ID STICKER: ${idStick}`) //digunakan untuk mendapatkan id sticker
             /*	Cara bikin stickercmd 
                 -ambil id sticker lewat console.log
             	-id sticker nya dibuat case 
@@ -1176,11 +1300,25 @@ module.exports = handle = (client, Client) => {
                     break
                 case '1.415045466145215e+123':
                     if(datas.isQuotedImage || datas.isQuotedVideo) {
-                        const getBuffs = await client.downloadMediaMessage(JSON.parse(JSON.stringify(datas.message.message.stickerMessage.contextInfo).replace('quotedMessage', 'message')))
-			if(isQuotedVideo) Client.sendMp4AsSticker(from, getBuffs.toString('base64'), message, { pack: `${configs.pack}`, author: `${configs.author}` })
+                    const getBuffs = await client.downloadMediaMessage(JSON.parse(JSON.stringify(datas.message.message.stickerMessage.contextInfo).replace('quotedMessage', 'message')))
+					if(isQuotedVideo) Client.sendMp4AsSticker(from, getBuffs.toString('base64'), message, { pack: `${configs.pack}`, author: `${configs.author}` })
                    	else Client.sendImageAsSticker(from, getBuffs.toString('base64'), message, {  pack: `${configs.pack}`, author: `${configs.author}` })    
                     }
                     break
+			    case '1.4129505721465047e+123':
+				    if(!datas.isGroup) return datas.reply(mess.group)
+                    if(!datas.isAdmin) return datas.reply(mess.admin)
+                    if(!datas.botIsAdmin) return datas.reply(mess.botAdmin)
+                    client.groupSettingChange(from, GroupSettingChange.messageSend, false)
+                    datas.reply(`Group telah dibuka oleh admin @${datas.sender.split('@')[0]}`)
+				    break
+			    case '1.3049292658533466e+123':
+				    if(!datas.isGroup) return datas.reply(mess.group)
+                    if(!datas.isAdmin) return datas.reply(mess.admin)
+                    if(!datas.botIsAdmin) return datas.reply(mess.botAdmin)
+                    client.groupSettingChange(from, GroupSettingChange.messageSend, true)
+                    datas.reply(`Group telah ditutup oleh admin @${datas.sender.split('@')[0]}`)
+				    break
             }
         })
     } catch (e) {
