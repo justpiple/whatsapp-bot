@@ -1,6 +1,6 @@
 /*Elios and Ben*/
 
-const { GroupSettingChange, WAMessageProto, prepareMessageFromContent, relayWAMessage } = require('@adiwajshing/baileys')
+const { GroupSettingChange, WAMessageProto, MessageType, prepareMessageFromContent, relayWAMessage } = require('@adiwajshing/baileys')
 const { exec } = require('child_process');
 const axios = require('axios')
 const fs = require('fs')
@@ -175,8 +175,52 @@ module.exports = handle = (client, Client) => {
             data.reply(`Hai @${data.sender.split('@')[0]} 👋🏻\n Limit anda tersisa ${limits || 30}\nLimit setiap hari di reset jam 00.00\nJika anda ingin mendapatkan unlimited limit silahkan chat owner bot ketik !owner`)
         })
         Client.cmd.on('info', async (data) => {
-            data.reply(ingfo)
-        })
+		//Yang ngasi fek reply bukan ben
+		try{	
+		client.sendMessage(data.from, new Buffer.from(fs.readFileSync('./lib/temp/doge.jpg')), MessageType.image, {
+        thumbnail: fs.readFileSync('./lib/temp/domge.jpg'),
+        caption: ingfo,
+        "contextInfo": {
+            text: 'hi',
+            "forwardingScore": 1000000000,
+            isForwarded: true,
+            sendEphemeral: true,
+            "externalAdReply": {
+                "title": "𝗪𝗛𝗔𝗧𝗦𝗔𝗣𝗣-𝗕𝗢𝗧",
+                "body": "𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗧𝗜𝗢𝗡",
+                "previewType": "PHOTO",
+                "thumbnailUrl": "https://telegra.ph/file/35bd3461172f0c45741fb.jpg",
+                "thumbnail": "",
+                "sourceUrl": "https://zeks.xyz"
+            }},
+			quoted: {
+            "key": {
+                "remoteJid": "status@broadcast",
+                "fromMe": false,
+                "id": generateMessageID(),
+                "participant": "0@s.whatsapp.net"
+            },
+            message: {
+                "productMessage": {
+                    "product": {
+                        "productImage": {
+                            "mimetype": "image/jpeg",
+                            "jpegThumbnail": fs.readFileSync('./lib/temp/domge.jpg')
+                        },
+                        "title": "𝗪𝗛𝗔𝗧𝗦𝗔𝗣𝗣-𝗕𝗢𝗧",
+                        "description": "𝗪𝗛𝗔𝗧𝗦𝗔𝗣𝗣-𝗕𝗢𝗧",
+                        "currencyCode": "IDR",
+                        "priceAmount1000": "0",
+                        "retailerId": "𝗕𝗢𝗧",
+                        "productImageCount": 1
+                    },
+                    "businessOwnerJid": `0@s.whatsapp.net`
+                }}}
+			}).catch()
+		} catch {
+			
+		}
+		})
         /*OWNER*/
         Client.cmd.on('setpp', async (data) => {
             if(!data.isOwner) return data.reply(mess.ownerOnly)
@@ -222,6 +266,26 @@ module.exports = handle = (client, Client) => {
             let listvn = 'Ketik nama vn untuk mendownload vn\n\n*List vn*:\n\n'
             vn.forEach((vnn, i) => listvn += `*${i+1}*. ${vnn}\n`)
             data.reply(listvn)
+        })
+		Client.cmd.on('tebakgambar', async (data) => {
+			if(isLimit(data.sender)) return data.reply(mess.limit)
+			if (global.tebakgambar[data.from] && global.tebakgambar[data.from].id) return data.reply("Masih ada soal yang berjalan")
+            const getSoal = await axios.get(`${configs.apiUrl}/api/tebakgambar?apikey=${configs.zeksKey}`)
+			ses = Date.now()
+			send = await Client.sendFileFromUrl(data.from, getSoal.data.result.soal, "soal.jpg", "Waktu menjawab 30 detik!", data.message)
+			global.tebakgambar[data.from] = {jawaban: getSoal.data.result.jawaban, id: ses}
+			await sleep(10000)
+			if (global.tebakgambar[data.from].id != ses) return
+			Client.reply(data.from,"Waktu tersisa 20 detik", send)
+			await sleep(10000)
+			if (global.tebakgambar[data.from].id != ses) return
+			Client.reply(data.from,"Waktu tersisa 10 detik", send)
+			await sleep(10000)
+			if (global.tebakgambar[data.from].id != ses) return
+			Client.reply(data.from, "Waktu habis", send)
+			Client.reply(data.from,`Jawabannya adalah: ${getSoal.data.result.jawaban}`, send)
+			global.tebakgambar[data.from] = {}
+			
         })
         Client.cmd.on('clearall', async (data) => {
             if(!data.isOwner) return data.reply(mess.ownerOnly)
@@ -297,7 +361,7 @@ module.exports = handle = (client, Client) => {
             res = await axios.get(`${configs.apiUrl}/api/tribunews?apikey=${configs.zeksKey}`)
             if(res.data.status == false) data.reply(res.data.message)
             ttt = res.data.result
-            let teks = `*「 TRIBUNNEWS 」*\n\n`
+            var teks = `*「 TRIBUNNEWS 」*\n\n`
             for(let i = 0; i < ttt.length; i++) {
                 teks += `*Title* : ${ttt[i].title}\n*Waktu* : ${ttt[i].time}\n*Keterangan*: ${ttt[i].ket}\n*Link*: ${ttt[i].url}\n\n`
             }
@@ -308,7 +372,7 @@ module.exports = handle = (client, Client) => {
             res = await axios.get(`${configs.apiUrl}/api/liputan6?apikey=${configs.zeksKey}`)
             if(res.data.status == false) data.reply(res.data.message)
             ttt = res.data.result
-            let teks = `*「 LIPUTANNEWS 」*\n\n`
+            var teks = `*「 LIPUTANNEWS 」*\n\n`
             for(let i = 0; i < ttt.length; i++) {
                 teks += `*Title* : ${ttt[i].title}\n*Waktu* : ${ttt[i].time}\n*Keterangan*: ${ttt[i].ket}\n*Kategori*: ${ttt[i].category}\n*Link*: ${ttt[i].url}\n\n`
             }
@@ -319,7 +383,7 @@ module.exports = handle = (client, Client) => {
             res = await axios.get(`${configs.apiUrl}/api/foxnews?apikey=${configs.zeksKey}`)
             if(res.data.status == false) data.reply(res.data.message)
             ttt = res.data.result
-            let teks = `*「 FOXNEWS 」*\n\n`
+            var teks = `*「 FOXNEWS 」*\n\n`
             for(let i = 0; i < ttt.length; i++) {
                 teks += `*Title* : ${ttt[i].title}\n*Waktu* : ${ttt[i].time}\n*Keterangan*: ${ttt[i].content}\n*Negara*: ${ttt[i].country}\n*Link*: ${ttt[i].url}\n\n`
             }
@@ -369,6 +433,39 @@ module.exports = handle = (client, Client) => {
             client.relayWAMessage(po, {waitForAck: true})
 			}
         })
+		Client.cmd.on('youtubedl', async (data) =>{
+            if(isLimit(data.sender)) return data.reply(mess.limit)
+            if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}youtubedl [ query ]*\nContoh : ${data.prefix}youtubedl Alan walker`)
+            data.reply(mess.wait)
+			axios.get(`${configs.apiUrl}/api/yts?apikey=${configs.zeksKey}&q=${data.body}`).then((xres) =>{
+			if (!xres.data.status || !xres.data.result) return data.reply(xres.data.message)
+			secs = []
+			xres.data.result.splice(5, xres.data.result.length)
+			xres.data.result.forEach((xres, i) =>{
+				secs.push({
+                        "rows": [
+                           {
+                              "title": "MP3",
+							  description: `Title: ${xres.video.title}\n\nUploader: ${xres.uploader.username}`,
+                              "rowId": `${data.prefix}ytmp3 ${xres.video.url}`
+                           },
+						   {
+                              "title": "MP4",
+							  description: `Title: ${xres.video.title}\n\nUploader: ${xres.uploader.username}`,
+                              "rowId": `${data.prefix}ytmp4 ${xres.video.url}`
+                           }
+                        ], title: i+1})
+			})
+			let po = client.prepareMessageFromContent(data.from, {
+				  "listMessage":{
+                  "title": "*YOUTUBE DOWNLOAD*",
+                  "description": `*Result for : ${data.body}*\n*Download video by click button bellow*`,
+                  "buttonText": "Result",
+                  "listType": "SINGLE_SELECT",
+                  "sections": secs}}, {}) 
+            client.relayWAMessage(po, {waitForAck: true})	
+			})
+		})
         Client.cmd.on('leave', (data) => {
             if(!data.isGroup) return data.reply(mess.admin)
             if(!data.isAdmin) return data.reply(mess.admin)
@@ -898,7 +995,7 @@ module.exports = handle = (client, Client) => {
                         data.reply(mess.wait)
                         res = await axios.get(`${configs.apiUrl}/api/sgplay?apikey=${configs.zeksKey}&q=${data.body}`)
                         ttt = res.data.result
-                        let teks = `*「 PLAYSTORE 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        var teks = `*「 PLAYSTORE 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
                         for(let i = 0; i < ttt.length; i++) {
                             teks += `*Title* : ${ttt[i].title}\n*Harga* : ${ttt[i].price}\n*Rate*: ${ttt[i].rating}\n*Link*: ${ttt[i].url}\n\n`
                         }
@@ -918,7 +1015,7 @@ module.exports = handle = (client, Client) => {
                     } catch {
                         data.reply(`Maaf wiki ${data.body} tidak ditemukan`)
                     }
-                    break
+                    break	
                 case 'kbbi':
                     try {
                         if(isLimit(data.sender)) return data.reply(mess.limit)
@@ -938,7 +1035,7 @@ module.exports = handle = (client, Client) => {
                         data.reply(mess.wait)
                         res = await axios.get(`${configs.apiUrl}/api/film?apikey=${configs.zeksKey}&q=${data.body}`)
                         ttt = res.data.result
-                        let teks = `*「 FILM 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        var teks = `*「 FILM 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
                         for(let i = 0; i < ttt.length; i++) {
                             teks += `*Title* : ${ttt[i].title}\n*Link*: ${ttt[i].url}\n\n`
                         }
@@ -954,7 +1051,7 @@ module.exports = handle = (client, Client) => {
                         data.reply(mess.wait)
                         res = await axios.get(`${configs.apiUrl}/api/happymod?apikey=${configs.zeksKey}&q=${data.body}`)
                         ttt = res.data.result
-                        let teks = `*「 HAPPYMOD 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        var teks = `*「 HAPPYMOD 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
                         for(let i = 0; i < ttt.length; i++) {
                             teks += `*Title* : ${ttt[i].title}\n*Rate*: ${ttt[i].rating}\n*Link*: ${ttt[i].url}\n\n`
                         }
@@ -970,7 +1067,7 @@ module.exports = handle = (client, Client) => {
                         data.reply(mess.wait)
                         res = await axios.get(`${configs.apiUrl}/api/iguser?apikey=${configs.zeksKey}&q=${data.body}`)
                         ttt = res.data.result
-                        let teks = `*「 INSTAGRAM USER 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        var teks = `*「 INSTAGRAM USER 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
                         for(let i = 0; i < ttt.length; i++) {
                             teks += `*Username* : ${ttt[i].username}\n*Full name*: ${ttt[i].full_name}\n*Akun private* : ${ttt[i].private_user}\n*Verified*: ${ttt[i].verified_user}\n*Link*: https://instagram.com/${ttt[i].username}\n\n`
                         }
@@ -986,12 +1083,44 @@ module.exports = handle = (client, Client) => {
                         data.reply(mess.wait)
                         res = await axios.get(`${configs.apiUrl}/api/yts?apikey=${configs.zeksKey}&q=${data.body}`)
                         ttt = res.data.result
-                        let teks = `*「 YOUTUBE 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        var teks = `*「 YOUTUBE 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
                         for(let i = 0; i < ttt.length; i++) {
                             teks += `*Title* : ${ttt[i].video.title}\n*Durasi*: ${ttt[i].video.duration}\n*Upload* : ${ttt[i].video.upload_date}\n*View*: ${ttt[i].video.views}\n*Channel*: ${ttt[i].uploader.username}\n*Link*: ${ttt[i].video.url}\n\n`
                         }
-                        await Client.sendFileFromUrl(from, ttt[0].video.thumbnail_src, 'p.jpg', teks, message)
-                    } catch {
+                        await Client.sendFileFromUrl(from, ttt[0].video.thumbnail_src, 'axis.jpg', teks, message)
+                    } catch(e) {
+                        data.reply(`Maaf pencarian ${data.body} tidak ditemukan`)
+                    }
+                    break
+                case 'ytplaylist':
+                    try {
+                        if(isLimit(data.sender)) return data.reply(mess.limit)
+                        if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}ytplaylist[ channel ]*\nContoh : ${data.prefix}ytplaylist jessnolimit`)
+                        data.reply(mess.wait)
+                        res = await axios.get(`${configs.apiUrl}/api/ytplaylist?apikey=${configs.zeksKey}&q=${data.body}`)
+                        ttt = res.data.result
+                        var tekss = `*「 YOUTUBE PLAYLIST 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        for(let i = 0; i < ttt.length; i++) {
+                            tekss += `*Nama* : ${ttt[i].title}\n*Jumlah video*: ${ttt[i].video_count}\n*Channel*: ${ttt[i].uploader.username}\n*Link*: ${ttt[i].url}\n\n`
+                        }
+                        await Client.sendFileFromUrl(from, ttt[0].thumbnail, 'axis.jpg', tekss, message)
+                    } catch(e) {
+                        data.reply(`Maaf pencarian ${data.body} tidak ditemukan`)
+                    }
+                    break
+                case 'ytchannel':
+                    try {
+                        if(isLimit(data.sender)) return data.reply(mess.limit)
+                        if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}ytchannel [ channel ]*\nContoh : ${data.prefix}ytchannel jessnolimit`)
+                        data.reply(mess.wait)
+                        res = await axios.get(`${configs.apiUrl}/api/ytchannel?apikey=${configs.zeksKey}&q=${data.body}`)
+                        ttt = res.data.result
+                        var eks = `*「 YOUTUBE CHANNEL 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        for(let i = 0; i < ttt.length; i++) {
+                            eks += `*Nama* : ${ttt[i].title}\n*Deskripsi*: ${ttt[i].description}\n*Verified* : ${ttt[i].verified}\n*Jumlah video*: ${ttt[i].video_count}\n*Subcriber*: ${ttt[i].subscriber_count}\n*Link*: ${ttt[i].url}\n\n`
+                        }
+                        await Client.sendFileFromUrl(from, ttt[0].thumbnail, 'axis.jpg', eks, message)
+                    } catch(e) {
                         data.reply(`Maaf pencarian ${data.body} tidak ditemukan`)
                     }
                     break
@@ -1002,7 +1131,7 @@ module.exports = handle = (client, Client) => {
                         data.reply(mess.wait)
                         res = await axios.get(`${configs.apiUrl}/api/shopee?apikey=${configs.zeksKey}&q=${data.body}`)
                         ttt = res.data.data
-                        let teks = `*「 SHOPEE 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        var teks = `*「 SHOPEE 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
                         for(let i = 0; i < ttt.length; i++) {
                             teks += `*Nama* : ${ttt[i].name}\n*Harga*: ${ttt[i].harga}\n*Terjual* : ${ttt[i].terjual}\n*Lokasi*: ${ttt[i].location}\n*Deskripsi*: ${ttt[i].desc}\n*Stok*: ${ttt[i].stock}\n*Informasi*: ${ttt[i].information}\n*Link*: ${ttt[i].url}\n\n`
                         }
@@ -1052,7 +1181,7 @@ module.exports = handle = (client, Client) => {
                         data.reply(mess.wait)
                         res = await axios.get(`${configs.apiUrl}/api/spotify?apikey=${configs.zeksKey}&q=${data.body}`)
                         ttt = res.data.data
-                        let teks = `*「 SPOTIFY 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                        var teks = `*「 SPOTIFY 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
                         for(let i = 0; i < ttt.length; i++) {
                             teks += `*Judul* : ${ttt[i].title}\n*Artis*: ${ttt[i].artists}\n*Album* : ${ttt[i].album}\n*Link*: ${ttt[i].url}\n*Preview*: ${ttt[i].preview_mp3}\n\n`
                         }
@@ -1143,7 +1272,7 @@ module.exports = handle = (client, Client) => {
                     res = await axios.get(`${configs.apiUrl}/api/jagokata?apikey=${configs.zeksKey}&q=${data.body}`)
                     if(res.data.status == false) data.reply(res.data.message)
                     ttt = res.data.result
-                    let teks = `*「 JAGOKATA 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
+                    var teks = `*「 JAGOKATA 」*\n\n*Hasil Pencarian : ${data.body}*\n\n`
                     ttt.forEach(tt1 => teks += `*Kata* : ${tt1.kata}\n*Author* : ${tt1.author}\n*Info*: ${tt1.author_info}\n*Link*: ${tt1.author_url}\n\n` )
                     await data.reply(teks)
                     break
@@ -1261,7 +1390,7 @@ module.exports = handle = (client, Client) => {
                     if(message.message.extendedTextMessage.contextInfo.quotedMessage.stickerMessage.isAnimated) {
                         axios(`https://serv-api.zeks.xyz/sticker/togif`, { method: "post", headers: { "content-type": 'application/json' }, data: {base64: mtdt.toString('base64')}}).then(bf => {
                             Client.sendFileFromBase64(from, bf.data.result, 'to.gif', 'nih', message)
-						})
+			})
                     } else {
                         axios(`https://serv-api.zeks.xyz/sticker/png`, { method: "post", headers: { "content-type": 'application/json' }, data: { base64: mtdt.toString('base64')}}).then(bf => {
                             Client.sendFileFromBase64(from, bf.data.result, 'to.png', 'nih', message)
@@ -1288,7 +1417,7 @@ module.exports = handle = (client, Client) => {
                 pushname,
                 t
             } = datas
-            console.log(`ID STICKER: ${idStick}`) //digunakan untuk mendapatkan id sticker
+            //console.log(`ID STICKER: ${idStick}`) //digunakan untuk mendapatkan id sticker
             /*	Cara bikin stickercmd 
                 -ambil id sticker lewat console.log
             	-id sticker nya dibuat case 
@@ -1300,7 +1429,7 @@ module.exports = handle = (client, Client) => {
                     break
                 case '1.415045466145215e+123':
                     if(datas.isQuotedImage || datas.isQuotedVideo) {
-                    const getBuffs = await client.downloadMediaMessage(JSON.parse(JSON.stringify(datas.message.message.stickerMessage.contextInfo).replace('quotedMessage', 'message')))
+                        const getBuffs = await client.downloadMediaMessage(JSON.parse(JSON.stringify(datas.message.message.stickerMessage.contextInfo).replace('quotedMessage', 'message')))
 					if(isQuotedVideo) Client.sendMp4AsSticker(from, getBuffs.toString('base64'), message, { pack: `${configs.pack}`, author: `${configs.author}` })
                    	else Client.sendImageAsSticker(from, getBuffs.toString('base64'), message, {  pack: `${configs.pack}`, author: `${configs.author}` })    
                     }
@@ -1333,4 +1462,7 @@ function isLimit(sender, count) {
     dataUser[sender].limit += count || 1
     fs.writeFileSync('./lib/json/dataUser.json', JSON.stringify(dataUser))
     return false
+}
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
 }

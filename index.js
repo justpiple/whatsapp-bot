@@ -23,26 +23,23 @@ const cron = require('node-cron');
 const config = JSON.parse(fs.readFileSync('./config.json'));
 let dataUser = JSON.parse(fs.readFileSync('./lib/json/dataUser.json'))
 global.vn = JSON.parse(fs.readFileSync('./lib/json/vn.json'))
+global.tebakgambar = {}
 moment.tz.setDefault('Asia/Jakarta').locale('id');
 const { color } = require('./lib/func')
 const Crypto = require('crypto')
 
-/*if (data.body && vn.includes(data.body)){
-	const vien = fs.readFileSync("./lib/vn"+ data.body+".mp3")
-	Client.sendPtt(data.from, vien, 'vn.mp3', ``, data.message)
-}*/
 const starts = async (sesName) => {
     try {
         const Client = new ClientJs(config, sesName || config.defaultSessionName)
         Client.starts()
         const client = Client.mainClient
-		require('./handler')(client, Client)
 		detectChange('./handler.js', (mdl) =>{
 			Client.cmd.removeAllListeners()
 			Client.handlerStick.removeAllListeners()
 			require('./handler')(client, Client)
 			console.log(color('[ INFO ]', 'cyan'), `${mdl} auto updated!`)
 		})
+		require('./handler')(client, Client)
 		
         client.on('CB:Presence', asd => {
         	asd = asd[1]
@@ -67,6 +64,7 @@ const starts = async (sesName) => {
 			const from = message.key.remoteJid
             const isGroup = from.endsWith('@g.us')
             const sender = isGroup ? message.participant : from
+			if (global.tebakgambar[from] && global.tebakgambar[from].id && global.tebakgambar[from].jawaban.toLowerCase() == body.toLowerCase()) Client.reply(from, `YES TEBAK GAMBAR BERHASIL DIJAWAB OLEH @${sender.split("@")[0]}`, message).then(() => global.tebakgambar[from] = {}) 
 			if (global.vn.includes(body)) Client.sendPtt(from, `./lib/vn/${body}.mp3`, message)
 			if (isGroup && !dataGc[from]){
 				dataGc[from] = {afk:{}}
