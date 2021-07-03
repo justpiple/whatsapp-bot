@@ -175,7 +175,6 @@ module.exports = handle = (client, Client) => {
             data.reply(`Hai @${data.sender.split('@')[0]} 👋🏻\n Limit anda tersisa ${limits || 30}\nLimit setiap hari di reset jam 00.00\nJika anda ingin mendapatkan unlimited limit silahkan chat owner bot ketik !owner`)
         })
         Client.cmd.on('info', async (data) => {
-		//Yang ngasi fek reply bukan ben
 		try{	
 		client.sendMessage(data.from, new Buffer.from(fs.readFileSync('./lib/temp/doge.jpg')), MessageType.image, {
         thumbnail: fs.readFileSync('./lib/temp/domge.jpg'),
