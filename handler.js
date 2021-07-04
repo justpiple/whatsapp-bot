@@ -175,50 +175,7 @@ module.exports = handle = (client, Client) => {
             data.reply(`Hai @${data.sender.split('@')[0]} 👋🏻\n Limit anda tersisa ${limits || 30}\nLimit setiap hari di reset jam 00.00\nJika anda ingin mendapatkan unlimited limit silahkan chat owner bot ketik !owner`)
         })
         Client.cmd.on('info', async (data) => {
-		try{	
-		client.sendMessage(data.from, new Buffer.from(fs.readFileSync('./lib/temp/doge.jpg')), MessageType.image, {
-        thumbnail: fs.readFileSync('./lib/temp/domge.jpg'),
-        caption: ingfo,
-        "contextInfo": {
-            text: 'hi',
-            "forwardingScore": 1000000000,
-            isForwarded: true,
-            sendEphemeral: true,
-            "externalAdReply": {
-                "title": "𝗪𝗛𝗔𝗧𝗦𝗔𝗣𝗣-𝗕𝗢𝗧",
-                "body": "𝗜𝗡𝗙𝗢𝗥𝗠𝗔𝗧𝗜𝗢𝗡",
-                "previewType": "PHOTO",
-                "thumbnailUrl": "https://telegra.ph/file/35bd3461172f0c45741fb.jpg",
-                "thumbnail": "",
-                "sourceUrl": "https://zeks.xyz"
-            }},
-			quoted: {
-            "key": {
-                "remoteJid": "status@broadcast",
-                "fromMe": false,
-                "id": generateMessageID(),
-                "participant": "0@s.whatsapp.net"
-            },
-            message: {
-                "productMessage": {
-                    "product": {
-                        "productImage": {
-                            "mimetype": "image/jpeg",
-                            "jpegThumbnail": fs.readFileSync('./lib/temp/domge.jpg')
-                        },
-                        "title": "𝗪𝗛𝗔𝗧𝗦𝗔𝗣𝗣-𝗕𝗢𝗧",
-                        "description": "𝗪𝗛𝗔𝗧𝗦𝗔𝗣𝗣-𝗕𝗢𝗧",
-                        "currencyCode": "IDR",
-                        "priceAmount1000": "0",
-                        "retailerId": "𝗕𝗢𝗧",
-                        "productImageCount": 1
-                    },
-                    "businessOwnerJid": `0@s.whatsapp.net`
-                }}}
-			}).catch()
-		} catch {
-			
-		}
+		data.reply(ingfo)
 		})
         /*OWNER*/
         Client.cmd.on('setpp', async (data) => {
@@ -266,7 +223,7 @@ module.exports = handle = (client, Client) => {
             vn.forEach((vnn, i) => listvn += `*${i+1}*. ${vnn}\n`)
             data.reply(listvn)
         })
-		Client.cmd.on('tebakgambar', async (data) => {
+        Client.cmd.on('tebakgambar', async (data) => {
 			if(isLimit(data.sender)) return data.reply(mess.limit)
 			if (global.tebakgambar[data.from] && global.tebakgambar[data.from].id) return data.reply("Masih ada soal yang berjalan")
             const getSoal = await axios.get(`${configs.apiUrl}/api/tebakgambar?apikey=${configs.zeksKey}`)
@@ -395,7 +352,7 @@ module.exports = handle = (client, Client) => {
             afkJs.addAfk(data.from, data.sender, data.body, timesNow)
             Client.sendText(data.from, "```" + `${data.pushname} [@${data.sender.split('@')[0]}] sedang AFK\n\nAlasan: ${data.body}\nTime: ${timesNow}` + "```")
         })
-        Client.cmd.on('welcome', (data) => {
+	     Client.cmd.on('welcome', (data) => {
             if(!data.isGroup) return data.reply(mess.admin)
             if(!data.isAdmin) return data.reply(mess.admin)
             const dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
@@ -432,7 +389,7 @@ module.exports = handle = (client, Client) => {
             client.relayWAMessage(po, {waitForAck: true})
 			}
         })
-		Client.cmd.on('youtubedl', async (data) =>{
+	    Client.cmd.on('youtubedl', async (data) =>{
             if(isLimit(data.sender)) return data.reply(mess.limit)
             if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}youtubedl [ query ]*\nContoh : ${data.prefix}youtubedl Alan walker`)
             data.reply(mess.wait)
@@ -464,7 +421,7 @@ module.exports = handle = (client, Client) => {
                   "sections": secs}}, {}) 
             client.relayWAMessage(po, {waitForAck: true})	
 			})
-		})
+        })
         Client.cmd.on('leave', (data) => {
             if(!data.isGroup) return data.reply(mess.admin)
             if(!data.isAdmin) return data.reply(mess.admin)

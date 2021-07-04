@@ -1,0 +1,30 @@
+<title>CONFIG WA BOT</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="/socket.io/socket.io.js"></script>
+<form action="/configs">
+   <input type="text" id="zeksKey" name="zeksKey">
+   <label for="zeksKey">zeks apiKey</label><br>
+   <input type="text" name="prefix" id="prefix">
+   <label for="prefix">prefix</label><br>
+   <input type="text" name="pack" id="pack">
+   <label for="pack">sticker pack name</label><br>
+   <input type="text" name="author" id="author">
+   <label for="author">sticker author</label><br>
+   <input type="text" name="maxLimit" id="maxLimit">
+   <label for="maxLimit">max limit</label><br>
+   <input name="autoRead" type="checkbox" id="autoRead">
+   <label for="autoRead">Auto Read</label><br>
+   <textarea id="ownerList" name="ownerList" rows="10" cols="30"></textarea>
+   <label for="ownerList">Owner</label><br>
+   <input type="submit" name="submit" value="Submit">
+</form>
+<script>
+   const socket = io();
+   socket.on("config", c => {
+   for (cn in c){
+   if (cn == "ownerList") document.getElementById(cn).value = c[cn].join("\n")
+   else if (cn == "autoRead" && c[cn]) document.getElementById(cn).setAttribute("checked", "checked");
+   else if (document.getElementById(cn)) document.getElementById(cn).value = c[cn]
+   }
+   })
+</script>

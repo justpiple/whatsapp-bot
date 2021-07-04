@@ -12,7 +12,7 @@ const {
     waChatKey,
     WAMessageProto,
 	prepareMessageFromContent,
-	relayWAMessage,
+    relayWAMessage,
 } = require("@adiwajshing/baileys");
 const fs = require('fs');
 const moment = require('moment-timezone');
@@ -20,7 +20,7 @@ const afkJs = require('./lib/afk')
 const vn = JSON.parse(fs.readFileSync('./lib/json/vn.json'))
 const ClientJs = require('./lib/client');
 const cron = require('node-cron');
-const config = JSON.parse(fs.readFileSync('./config.json'));
+global.configs = JSON.parse(fs.readFileSync('./config.json'));
 let dataUser = JSON.parse(fs.readFileSync('./lib/json/dataUser.json'))
 global.vn = JSON.parse(fs.readFileSync('./lib/json/vn.json'))
 global.tebakgambar = {}
@@ -30,9 +30,10 @@ const Crypto = require('crypto')
 
 const starts = async (sesName) => {
     try {
-        const Client = new ClientJs(config, sesName || config.defaultSessionName)
+        const Client = new ClientJs(global.configs, sesName || global.configs.defaultSessionName)
+		const client = Client.mainClient
+		require("./lib/http-server")(client)
         Client.starts()
-        const client = Client.mainClient
 		detectChange('./handler.js', (mdl) =>{
 			Client.cmd.removeAllListeners()
 			Client.handlerStick.removeAllListeners()
@@ -58,7 +59,7 @@ const starts = async (sesName) => {
 		})
         client.on('new-msg', (message) => {
             if(message.key && message.key.remoteJid == 'status@broadcast') return
-            if(message.key.fromMe && !config.self || !message.key.fromMe && config.self) return
+            if(message.key.fromMe && !global.configs.self || !message.key.fromMe && global.configs.self) return
 			let dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
 			const body = message.body
 			const from = message.key.remoteJid
