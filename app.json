@@ -2,6 +2,6 @@
   "name": "whatsapp-bot",
   "description": "whatsapp bot build with nodejs",
   "repository": "https://github.com/justpiple/whatsapp-bot",
-  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "logo": "https://api.zeks.xyz/logo.jpg",
   "keywords": ["nodejs", "bot", "whatsapp bot", "whatsapp automation"]
 }
