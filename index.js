@@ -17,6 +17,7 @@ const {
 const fs = require('fs');
 const moment = require('moment-timezone');
 const afkJs = require('./lib/afk')
+const yargs = require('yargs/yargs')
 const vn = JSON.parse(fs.readFileSync('./lib/json/vn.json'))
 const ClientJs = require('./lib/client');
 const cron = require('node-cron');
@@ -125,4 +126,5 @@ const randomBytes = (length) => {
 global.generateMessageID = () => {
     return '3EB0' + randomBytes(7).toString('hex').toUpperCase()
 }
+global.optn = yargs(process.argv.slice(2)).exitProcess(false).parse()
 starts(process.argv[2])

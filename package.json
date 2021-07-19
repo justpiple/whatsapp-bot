@@ -18,7 +18,8 @@
     "node-cron": "^3.0.0",
     "qrcode": "^1.4.4",
     "socket.io": "^4.1.2",
-    "spinnies": "^0.5.1"
+    "spinnies": "^0.5.1",
+    "yargs": "^17.0.1"
   },
   "devDependencies": {},
   "scripts": {

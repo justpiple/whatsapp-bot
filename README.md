@@ -38,10 +38,14 @@
 ### Start ✅
 
 ```bash
-> npm start [session name]
+> npm start [session name] [--options]
 ```
+`options`
+ `port`
+--port [port number]
+
 after start it you need to scan the qr
-#### Session name is optional
+#### Session name and options is optional
 ### Contact me
 
 - [TELEGRAM](https://t.me/justpiple)
