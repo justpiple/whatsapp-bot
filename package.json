@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "dependencies": {
-    "@adiwajshing/baileys": "^3.4.1",
+    "@adiwajshing/baileys": "^3.5.1",
     "axios": "^0.21.1",
     "child_process": "^1.0.2",
     "express": "^4.17.1",
