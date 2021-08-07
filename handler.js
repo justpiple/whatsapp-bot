@@ -8,7 +8,7 @@ let FormData = require('form-data')
 const afkJs = require('./lib/afk')
 const moment = require('moment-timezone');
 const { mess, menu, ingfo } = require('./lib/text')
-const { color, getBuffer } = require('./lib/func')
+const { color, getBuffer, convertMp3 } = require('./lib/func')
 moment.tz.setDefault('Asia/Jakarta').locale('id');
 module.exports = handle = (client, Client) => {
     try {
@@ -842,6 +842,14 @@ module.exports = handle = (client, Client) => {
                     if(type == 'videoMessage' || isQuotedVideo) Client.sendMp4AsSticker(from, dlfile.toString('base64'), message, { pack: `${configs.pack}`, author: `${configs.author}` })
                     else Client.sendImageAsSticker(from, dlfile.toString('base64'), message, { pack: `${configs.pack}`, author: `${configs.author}` })
                     break
+                case 'tomp3':
+                    if(isLimit(data.sender)) return data.reply(mess.limit)
+					data.reply(mess.wait)
+                    if(type != 'videoMessage' && !isQuotedVideo) return data.reply('Wrong format!')
+					const getbuffz = data.isQuotedVideo ? JSON.parse(JSON.stringify(message).replace('quotedM','m')).message.extendedTextMessage.contextInfo : data.message	
+				    const dlfilez = await client.downloadMediaMessage(getbuffz)
+                    convertMp3(dlfilez).then(data =>Client.sendFileFromUrl(from, data, 'p.mp3', '', message)).catch(er => Client.reply(from, 'Unexpected error!', message))
+					break
                 case 'stikerwm':
                 case 'stickerwm':
                 case 'swm':
