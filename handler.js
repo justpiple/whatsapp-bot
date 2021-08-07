@@ -455,9 +455,48 @@ module.exports = handle = (client, Client) => {
             client.relayWAMessage(po, {waitForAck: true})
 			}
         })
+		Client.cmd.on('antitagall', (data) => {
+            if(!data.isGroup) return data.reply(mess.admin)
+            if(!data.isAdmin) return data.reply(mess.admin)
+            if(!data.botIsAdmin) return data.reply(mess.botAdmin)
+            const dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
+            if(data.args[0].toLowerCase() == 'on') {
+                if(dataGc[data.from].antitagall) return data.reply('Already on!')
+                dataGc[data.from].antitagall = true
+                fs.writeFileSync('./lib/json/dataGc.json', JSON.stringify(dataGc))
+                data.reply('Sukses!')
+            } else if(data.args[0].toLowerCase() == 'off') {
+                if(!dataGc[data.from].antitagall) return data.reply('Already off!')
+                dataGc[data.from].antitagall = false
+                fs.writeFileSync('./lib/json/dataGc.json', JSON.stringify(dataGc))
+                data.reply('Sukses!')
+            } else {
+				let po = client.prepareMessageFromContent(data.from, {
+					"listMessage":{
+                  "title": "*WHATSAPP-BOT*",
+                  "description": "pilh on/off",
+                  "buttonText": "COMMANDS",
+                  "listType": "SINGLE_SELECT",
+                  "sections": [
+                     {
+                        "rows": [
+                           {
+                              "title": "on",
+                              "rowId": `${data.prefix}${data.command} on`
+                           },
+						   {
+                              "title": "off",
+                              "rowId": `${data.prefix}${data.command} off`
+                           }
+                        ]
+                     }]}}, {}) 
+            client.relayWAMessage(po, {waitForAck: true})
+			}
+        })
 		Client.cmd.on('antilink', (data) => {
             if(!data.isGroup) return data.reply(mess.admin)
             if(!data.isAdmin) return data.reply(mess.admin)
+            if(!data.botIsAdmin) return data.reply(mess.botAdmin)
             const dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
             if(data.args[0].toLowerCase() == 'on') {
                 if(dataGc[data.from].antilink) return data.reply('Already on!')
