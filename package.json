@@ -21,6 +21,9 @@
     "spinnies": "^0.5.1",
     "yargs": "^17.0.1"
   },
+  "engines": {
+    "node": "16.6.1"
+  },
   "devDependencies": {},
   "scripts": {
     "start": "node ."
