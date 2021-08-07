@@ -36,10 +36,14 @@ const starts = async (sesName) => {
 		require("./lib/http-server")(client)
         Client.starts()
 		detectChange('./handler.js', (mdl) =>{
+			try{
 			Client.cmd.removeAllListeners()
 			Client.handlerStick.removeAllListeners()
 			require('./handler')(client, Client)
 			console.log(color('[ INFO ]', 'cyan'), `${mdl} auto updated!`)
+			} catch (err) {
+             console.error(err)
+           }
 		})
 		require('./handler')(client, Client)
 		
