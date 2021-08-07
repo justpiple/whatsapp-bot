@@ -19,7 +19,9 @@
     "qrcode": "^1.4.4",
     "socket.io": "^4.1.2",
     "spinnies": "^0.5.1",
-    "yargs": "^17.0.1"
+    "yargs": "^17.0.1",
+    "node": "^16.6.1",
+    "npm": "latest"
   },
   "engines": {
     "node": "16.6.1"
