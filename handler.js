@@ -8,11 +8,30 @@ let FormData = require('form-data')
 const afkJs = require('./lib/afk')
 const moment = require('moment-timezone');
 const { mess, menu, ingfo } = require('./lib/text')
+const { music } = require('./lib/music.js')
 const { color, getBuffer, convertMp3 } = require('./lib/func')
 moment.tz.setDefault('Asia/Jakarta').locale('id');
 module.exports = handle = (client, Client) => {
     try {
         /*DOWNLOADER*/
+		Client.cmd.on('spotifydown', async (data) => {
+			try {
+				if(isLimit(data.sender)) return data.reply(mess.limit)
+				if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}spotify [ judul lagu ]*\nContoh : ${data.prefix}spotify boy pablo beach house`)
+				data.reply(mess.wait)
+				res = await axios.get(`http://lolhuman.herokuapp.com/api/spotifysearch?apikey=${lolhuman}&query=${data.body}`)
+				if(res.data.status == 404) data.reply(res.data.result)
+				sptfy = res.data
+				textsptfy = `*Data berhasil didapatkan!*\n\n*Judul* : ${sptfy.result[0].title}\n*Artis* : ${sptfy.result[0].artists}\n*Durasi* : ${sptfy.result[0].duration}\n*Popularitas* : ${sptfy.result[0].popularity}\n\n_Silahkan tunggu file media sedang dikirim mungkin butuh beberapa menit_`
+				Client.sendText(data.from, textsptfy)
+				music.spotify(sptfy.result[0].link)
+				.then(async (res) => {
+					Client.sendFileFromUrl(data.from, res.link, 'song.mp3', `Lagu telah terkirim @{data.sender.split('@')[0]}`, data.message)
+				})
+			} catch {
+				data.reply('Ups maaf server sedang error atau mungkin apikey invalid')
+			}
+		})
         Client.cmd.on('ytmp4', async (data) => {
             try {
                 if(isLimit(data.sender)) return data.reply(mess.limit)
