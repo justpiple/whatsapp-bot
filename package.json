@@ -7,7 +7,7 @@
     "lib": "lib"
   },
   "dependencies": {
-    "@adiwajshing/baileys": "github:adiwajshing/baileys",
+    "@adiwajshing/baileys": "^3.5.2",
     "axios": "^0.21.1",
     "child_process": "^1.0.2",
     "express": "^4.17.1",
@@ -19,9 +19,7 @@
     "qrcode": "^1.4.4",
     "socket.io": "^4.1.2",
     "spinnies": "^0.5.1",
-    "yargs": "^17.0.1",
-    "node": "^16.6.1",
-    "npm": "latest"
+    "yargs": "^17.0.1"
   },
   "engines": {
     "node": "16.6.1"
