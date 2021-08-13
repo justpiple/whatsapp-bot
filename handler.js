@@ -5,9 +5,10 @@ const { exec } = require('child_process');
 const axios = require('axios')
 const fs = require('fs')
 let FormData = require('form-data')
+let fetch = require('node-fetch')
 const afkJs = require('./lib/afk')
 const moment = require('moment-timezone');
-const { mess, menu, ingfo } = require('./lib/text')
+const { mess, menu, ingfo, listCode } = require('./lib/text')
 const { color, getBuffer, convertMp3 } = require('./lib/func')
 moment.tz.setDefault('Asia/Jakarta').locale('id');
 module.exports = handle = (client, Client) => {
@@ -172,6 +173,73 @@ module.exports = handle = (client, Client) => {
         })
         Client.cmd.on('info', async (data) => {
 		data.reply(ingfo)
+		})
+		/*ANIME*/
+        Client.cmd.on('waifu', async (data) => {
+			if(isLimit(data.sender)) return data.reply(mess.limit)
+			const res = await axios.get(`https://waifu.pics/api/sfw/waifu`)
+			const mediaMsg = await client.prepareMessageMedia(await getBuffer(res.data.url), 'imageMessage')
+            const buttonMessage = {
+			      contentText: 'Waifu',
+				  footerText: 'Press the button below to get a random waifu image',
+                        "contextInfo": {
+                              participant: data.sender,
+                              stanzaId: data.message.key.id,
+                              quotedMessage: data.message.message,
+							  },
+                              buttons: [
+                                {
+                                 buttonId: `${data.prefix}waifu`,
+                                 buttonText: {
+                                    displayText: `⏯️ Get again`
+                                  },
+                                  "type": "RESPONSE"
+                                },
+                                  ],
+                                   headerType: 4,
+                                ...mediaMsg 
+                                }
+            let zz = await client.prepareMessageFromContent(data.from, {buttonsMessage: buttonMessage}, {})
+            client.relayWAMessage(zz, {waitForAck: true}) 
+		})
+        Client.cmd.on('anime', async (data) => {
+			try {
+			if(isLimit(data.sender)) return data.reply(mess.limit)
+            if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}anime [ query ]*\nContoh : ${data.prefix}anime naruto`)
+            data.reply(mess.wait)
+            const res = await fetch(`https://api.jikan.moe/v3/search/anime?q=${data.body}`)
+			const damta = await res.json()
+			const { title, synopsis, episodes, url, rated, score, image_url } = damta.results[0]
+			Client.sendFileFromUrl(data.from, image_url, 'p.jpg', `*Anime found!*\n\n*Title:* ${title}\n*Episodes:* ${episodes}\n*Rating:* ${rated}\n*Score:* ${score}\n*Synopsis:* ${synopsis}\n*URL*: ${url}`, data.message)
+            } catch {
+                data.reply('Anime not found')
+            }
+		})
+        Client.cmd.on('manga', async (data) => {
+			try {
+			if(isLimit(data.sender)) return data.reply(mess.limit)
+            if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}manga [ query ]*\nContoh : ${data.prefix}manga naruto`)
+            data.reply(mess.wait)
+            const res = await fetch(`https://api.jikan.moe/v3/search/manga?q=${data.body}`)
+			const damta = await res.json()
+			const { title, synopsis, chapters, url, rated, score, image_url } = damta.results[0]
+			Client.sendFileFromUrl(data.from, image_url, 'p.jpg', `*Manga found!*\n\n*Title:* ${title}\n*Chapters:* ${chapters}\n*Rating:* ${rated}\n*Score:* ${score}\n*Synopsis:* ${synopsis}\n*URL*: ${url}`, data.message)
+            } catch {
+                data.reply('Manga not found')
+            }
+		})
+        Client.cmd.on('chara', async (data) => {
+			try {
+			if(isLimit(data.sender)) return data.reply(mess.limit)
+            if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}chara [ query ]*\nContoh : ${data.prefix}manga naruto`)
+            data.reply(mess.wait)
+            const res = await fetch(`https://api.jikan.moe/v3/search/character?q=${data.body}`)
+			const damta = await res.json()
+			const { name, alternative_names, url, image_url } = damta.results[0]
+			Client.sendFileFromUrl(data.from, image_url, 'p.jpg', `*Character found!*\n\n*Name:* ${name}\n*Alternative names:* ${alternative_names}\n*URL*: ${url}`, data.message)
+            } catch {
+                data.reply('Character not found')
+            }
 		})
         /*OWNER*/
         Client.cmd.on('setpp', async (data) => {
@@ -1353,6 +1421,13 @@ module.exports = handle = (client, Client) => {
                     res = await axios.get(`${configs.apiUrl}/api/jadwaltv?apikey=${configs.zeksKey}&channel=${data.body}`)
                     data.reply(res.data.result)
                     break
+                case 'tts':
+                    if(isLimit(data.sender)) return data.reply(mess.limit)
+                    if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}${data.command} [ code|teks ]*\nContoh : ${data.prefix}${data.command} id|hello world`)
+                    p = data.body
+                    text = p.split('|')
+			        Client.sendFileFromUrl(from, `${configs.apiUrl}/api/tts?apikey=${configs.zeksKey}&code=${text[0]}&text=${text[1]}`, 'p.mp3', '', message, {ptt: true}).catch(er => data.reply(listCode))
+					break
                     /*GROUP*/
                 case 'hidetag':
                 case 'everyone':
