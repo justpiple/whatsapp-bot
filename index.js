@@ -80,6 +80,13 @@ const starts = async (sesName) => {
                 Client.reply(from, 'Tagall detected', message)
                 client.groupRemove(from, [sender]).catch(() => Client.reply(from, `Jadikan bot admin agar bisa menggunakan fitur antitagall`, message))
             }
+            if (isGroup && dataGc[from].antiviewonce && message.type == 'viewOnceMessage'){
+                var msg = {...message}
+                msg.message = message.message.viewOnceMessage.message
+                msg.message[Object.keys(msg.message)[0]].viewOnce = false
+                Client.reply(from, 'ViewOnce detected!', message)
+                client.forwardMessage(from, msg)
+            }
 			if (isGroup && !message.isAdmin && dataGc[from].antilink && /chat\.whatsapp\.com/gi.test(body)){
 				let dtclink = body.match(/chat.whatsapp.com\/(?:invite\/)?([0-9A-Za-z]{18,26})/gi) || []
 				dtclink.forEach(async l => {
