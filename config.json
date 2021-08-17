@@ -1,12 +1,12 @@
 {	
 	"prefix": "multi", 
-	"defaultSessionName": "bot", 
-	"zeksKey": "apikey",
+	"defaultSessionName": "bot-whatsapp", 
+	"zeksKey": "apivinz",
 	"autoRead": true,
-	"maxLimit": 30,
-	"ownerList": ["628xxxxxx@s.whatsapp.net", "6282xxxxxx@s.whatsapp.net"],
+	"maxLimit": 25,
+	"ownerList": ["6283195138570@s.whatsapp.net", "6283195138570@s.whatsapp.net"],
 	"apiUrl": "https://api.zeks.xyz",
-    "imgUrl": "https://api.zeks.xyz/logo.jpg",
-	"pack": "Sticker",
+    "imgUrl": "https://raw.githubusercontent.com/inirey/inirey/main/4a16641bd5c493dd8f8d2758492fb469.jpg",
+	"pack": "WhatsApp",
 	"author": "BOT"
 }
