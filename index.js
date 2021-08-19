@@ -64,7 +64,7 @@ const starts = async (sesName) => {
 		})
         client.on('new-msg', (message) => {
             if(message.key && message.key.remoteJid == 'status@broadcast') return
-            if(message.key.fromMe && !global.configs.self || !message.key.fromMe && global.configs.self) return
+            if(message.key.fromMe && !Client.self || !message.key.fromMe && Client.self) return
 			let dataGc = JSON.parse(fs.readFileSync('./lib/json/dataGc.json'))
 			const body = message.body
 			const from = message.key.remoteJid
