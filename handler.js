@@ -741,7 +741,7 @@ module.exports = handle = (client, Client) => {
             if(!data.isAdmin) return data.reply(mess.admin)
             if(!data.botIsAdmin) return data.reply(mess.botAdmin)
             if(data.mentionedJidList.length == 0) return data.reply(`Kirim perintah *${data.prefix}${data.command} [ @tag ]*\nContoh : ${data.prefix}${data.command} @0`)
-            client.groupRemove(data.from, data.mentionedJidList).then(() => data.reply(`Berhasil mengeluarkan @${data.mentionedJidList.join(' @').replace(/@s.whatsapp.net/g, '')}`)).catch(() => data.reply('Gagal!'))
+            data.mentionedJidList.forEach(async jid =>{ client.groupRemove(from, [jid]).then(x => data.reply(`Sukses kick @${jid.split('@')[0]}`)).catch(x => data.reply(`Gagal kick @${jid.split('@')[0]}`)); await sleep(2000)})
         })
         Client.cmd.on('add', async (data) => {
             if(isLimit(data.sender)) return data.reply(mess.limit)
@@ -896,6 +896,18 @@ module.exports = handle = (client, Client) => {
                 t
             } = data
             switch(command.toLowerCase()) {
+				case 'self':
+					if (!isOwner) return data.reply(mess.ownerOnly)
+					if (Client.self) return data.reply('Already Self Mode')
+					Client.self = true
+					data.reply('OK')
+				break
+				case 'public':
+					if (!isOwner) return data.reply(mess.ownerOnly)
+					if (!Client.self) return data.reply('Already Public Mode')
+					Client.self = false
+					data.reply('OK')
+				break
                 case 'command':
                 case 'cmd':
                 case 'menu':
@@ -966,7 +978,7 @@ module.exports = handle = (client, Client) => {
                     const dlfiles = await client.downloadMediaMessage(getbuffs)
                     text = data.body.split('|')
                     if(type == 'videoMessage' || isQuotedVideo) Client.sendMp4AsSticker(from, dlfiles.toString('base64'), message, { crop: false, pack: `${text[0]}`, author: `${text[1]}` })
-                    else Client.sendImageAsSticker(from, dlfiles.toString('base64'), message, { pack: `${text[0]}`, author: `${text[1]}` })
+                    else Client.sendImageAsSticker(from, dlfiles.toString('base64'), message, { pack: `${text[0]}`, author: `${text[1]}`, emojis: data.body.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g) })
                     break
                 case 'stikeremoji':
                 case 'stickeremoji':
@@ -974,7 +986,7 @@ module.exports = handle = (client, Client) => {
                     try {
                         if(isLimit(data.sender)) return data.reply(mess.limit)
                         if(data.body == "") return data.reply(`Kirim perintah *${data.prefix}${data.command} [ emoji ]*\nContoh : ${data.prefix}${data.command} 😃`)
-                        Client.sendStickerFromUrl(from, `${configs.apiUrl}/api/emoji-image?apikey=${configs.zeksKey}&emoji=${encodeURIComponent(data.body)}`, message, { pack: `${configs.pack}`, author: `${configs.author}` })
+                        Client.sendStickerFromUrl(from, `${configs.apiUrl}/api/emoji-image?apikey=${configs.zeksKey}&emoji=${encodeURIComponent(data.body)}`, message, { pack: `${configs.pack}`, author: `${configs.author}`, emojis: data.body.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g)})
                     } catch {
                         data.reply('error')
                     }
@@ -988,10 +1000,7 @@ module.exports = handle = (client, Client) => {
                     p = data.body
                     text = p.split('|')
                     const buff = await client.downloadMediaMessage(JSON.parse(JSON.stringify(data.message).replace('quotedM', 'm')).message.extendedTextMessage.contextInfo)
-                    Client.sendWebpAsSticker(data.from, buff.toString('base64'), data.message, {
-                        pack: `${text[0]}`,
-                        author: `${text[1]}`
-                    })
+                    Client.sendWebpAsSticker(data.from, buff.toString('base64'), data.message, {pack: `${text[0]}`, author: `${text[1]}`, emojis: data.body.match(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g)})
                     break
                 case 'stikerfire':
                 case 'stickerfire':
