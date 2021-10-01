@@ -316,6 +316,16 @@ module.exports = handle = (client, Client) => {
             })
             data.reply('OkE')
         })
+	Client.cmd.on('ping', async (data) => {
+        const timestamp = speed()
+        const latensi = speed() - timestamp
+        exec(`neofetch --stdout`, (error, stdout, stderr) => {
+          const child = stdout.toString("utf-8");
+          const ssd = child.replace(/Memory:/, "Ram:")
+          const pingnya = `*${ssd}Speed: ${latensi.toFixed(4)} Second*`
+          data.reply(pingnya)
+    })
+    })
         Client.cmd.on('resetlimit', async (data) => {
             if(!data.isOwner) return data.reply('Owner only!')
             const dataUser = JSON.parse(fs.readFileSync('./lib/json/dataUser.json'))
